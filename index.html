@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Pollentagebuch</title>
+
+<!-- Theme & App-Verhalten -->
+<meta name="theme-color" content="#0f766e">
+<meta name="color-scheme" content="light">
+<meta name="application-name" content="Pollentagebuch">
+<meta name="description" content="Therapietagebuch: Symptome, Medikamente, Pollenbelastung">
+
+<!-- iOS / Safari: Vollbild-App -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pollentagebuch">
+
+<!-- Android / Chrome: Vollbild-App -->
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Icon (inline SVG als Data-URI, damit alles in einer Datei bleibt) -->
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%230f766e"/><circle cx="50" cy="40" r="14" fill="%23fef3c7"/><circle cx="38" cy="52" r="9" fill="%23fef3c7"/><circle cx="62" cy="52" r="9" fill="%23fef3c7"/><circle cx="50" cy="62" r="9" fill="%23fef3c7"/><circle cx="50" cy="50" r="6" fill="%23fb923c"/><rect x="48" y="52" width="4" height="28" fill="%23065f46"/></svg>'>
+<link rel="apple-touch-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="40" fill="%230f766e"/><circle cx="90" cy="72" r="25" fill="%23fef3c7"/><circle cx="68" cy="94" r="16" fill="%23fef3c7"/><circle cx="112" cy="94" r="16" fill="%23fef3c7"/><circle cx="90" cy="112" r="16" fill="%23fef3c7"/><circle cx="90" cy="90" r="11" fill="%23fb923c"/><rect x="86" y="94" width="8" height="50" fill="%23065f46"/></svg>'>
+
+<!-- Web App Manifest (inline als Data-URI) -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"Pollentagebuch","short_name":"Pollentagebuch","start_url":".","display":"standalone","background_color":"%23f4f6f8","theme_color":"%230f766e","orientation":"portrait","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 rx=%2242%22 fill=%22%230f766e%22/></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f6f8;
+    color: #1f2937;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .app {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(48px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  header {
+    text-align: center;
+    padding: 16px 0 24px;
+  }
+  header h1 {
+    font-size: 22px;
+    color: #0f766e;
+  }
+  header p {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .card h2 {
+    font-size: 17px;
+    margin-bottom: 14px;
+    color: #0f766e;
+  }
+  .field {
+    margin-bottom: 16px;
+  }
+  .field label.lbl {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #374151;
+  }
+  input[type="date"],
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    background: #fff;
+    color: #1f2937;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.15);
+  }
+
+  /* Toggle */
+  .toggle {
+    display: flex;
+    background: #e5e7eb;
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .toggle input { display: none; }
+  .toggle label {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.15s;
+  }
+  .toggle input:checked + label {
+    background: #0f766e;
+    color: #fff;
+  }
+
+  /* Checkbox pills */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pills input { display: none; }
+  .pills label {
+    display: inline-block;
+    padding: 9px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #fff;
+    color: #374151;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .pills input:checked + label {
+    background: #0f766e;
+    border-color: #0f766e;
+    color: #fff;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+  }
+  .row .field { flex: 1; }
+
+  /* Medikamenten-Zeile mit Tropfenanzahl */
+  .med-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .med-row label.chk {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    cursor: pointer;
+    font-size: 15px;
+    color: #374151;
+    font-weight: 500;
+  }
+  .med-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #0f766e;
+    cursor: pointer;
+  }
+  .med-row input.drops {
+    width: 64px;
+    padding: 8px 10px;
+    font-size: 15px;
+    text-align: center;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+  }
+  .med-row .unit {
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  button.secondary {
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    color: #0f766e;
+    border: 2px solid #0f766e;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  button.secondary:active { background: #ecfdf5; }
+
+  select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    background: #fff;
+    color: #1f2937;
+  }
+
+  /* Pollen-Grid (Eingabe) */
+  .legend {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  .legend span.item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #f3f4f6;
+  }
+  .legend .sw {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    border: 1px solid #d1d5db;
+    display: inline-block;
+  }
+  .hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+  }
+  .pollen-grid {
+    display: grid;
+    grid-template-columns: 88px repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .pollen-grid .head {
+    font-size: 11px;
+    text-align: center;
+    color: #6b7280;
+    font-weight: 600;
+    padding: 4px 0;
+  }
+  .pollen-grid .name {
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    padding-right: 4px;
+    line-height: 1.15;
+  }
+  .pollen-grid .cell {
+    aspect-ratio: 1 / 1;
+    min-height: 34px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    user-select: none;
+  }
+  .l-keine   { background: #ffffff; color: #9ca3af; }
+  .l-niedrig { background: #fde68a; border-color: #f59e0b !important; color: #78350f; }
+  .l-mittel  { background: #fb923c; border-color: #ea580c !important; color: #fff; }
+  .l-hoch    { background: #ef4444; border-color: #b91c1c !important; color: #fff; }
+
+  /* Pollen-Bericht (Anzeige) */
+  .pollen-entry {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .pollen-entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .pollen-entry-head .period {
+    font-weight: 700;
+    color: #0f766e;
+    font-size: 14px;
+  }
+  .pollen-entry-meta {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+  .pollen-mini {
+    display: grid;
+    grid-template-columns: 88px repeat(7, 1fr);
+    gap: 2px;
+  }
+  .pollen-mini .head {
+    font-size: 9px;
+    color: #9ca3af;
+    text-align: center;
+    font-weight: 600;
+  }
+  .pollen-mini .name {
+    font-size: 10px;
+    color: #374151;
+    padding: 2px 4px 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.15;
+    display: flex;
+    align-items: center;
+  }
+  .pollen-mini .cell {
+    aspect-ratio: 1 / 1;
+    min-height: 18px;
+    border-radius: 3px;
+    border: 1px solid #e5e7eb;
+  }
+
+  /* Pollenarten verwalten */
+  .type-add {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .type-add input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+  }
+  .type-add button {
+    padding: 10px 16px;
+    background: #0f766e;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* Kalender */
+  .cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .cal-header .month {
+    font-weight: 700;
+    font-size: 16px;
+    color: #0f766e;
+  }
+  .cal-nav {
+    background: #f3f4f6;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f766e;
+    cursor: pointer;
+  }
+  .cal-nav:active { background: #e5e7eb; }
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .calendar .wd {
+    font-size: 11px;
+    text-align: center;
+    color: #6b7280;
+    font-weight: 600;
+    padding: 4px 0;
+  }
+  .calendar .day {
+    aspect-ratio: 1 / 1;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fafafa;
+    font-size: 13px;
+    color: #d1d5db;
+    position: relative;
+    user-select: none;
+  }
+  .calendar .day.in-month { color: #9ca3af; }
+  .calendar .day.has-entry {
+    cursor: pointer;
+    background: #ecfdf5;
+    border-color: #6ee7b7;
+    color: #065f46;
+    font-weight: 600;
+  }
+  .calendar .day.has-entry:active { transform: scale(0.95); }
+  .calendar .day.has-sym {
+    background: #fef3c7;
+    border-color: #fbbf24;
+    color: #78350f;
+  }
+  .calendar .day.has-sym-many {
+    background: #fecaca;
+    border-color: #f87171;
+    color: #991b1b;
+  }
+  .calendar .day.today { box-shadow: inset 0 0 0 2px #0f766e; }
+  .calendar .day .pd {
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 11px;
+    color: #6b7280;
+  }
+  .cal-legend .it {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .cal-legend .sw {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px 12px;
+    overflow-y: auto;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-top: 40px;
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f766e;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: #6b7280;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-section {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #374151;
+  }
+  .modal-section strong {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .modal-section .tag {
+    display: inline-block;
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin: 2px 2px 0 0;
+  }
+  .modal-pollen {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .modal-pollen .plist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .modal-pollen .pitem {
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .modal-actions button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid #dc2626;
+    background: #fff;
+    color: #dc2626;
+  }
+  .modal-actions button:active { background: #fee2e2; }
+
+  button.primary {
+    width: 100%;
+    padding: 15px;
+    background: #0f766e;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  button.primary:active { background: #0c5f58; }
+
+  /* Entry list */
+  .entry {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .entry-date {
+    font-weight: 700;
+    color: #0f766e;
+    font-size: 15px;
+  }
+  .entry-del {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .entry-body {
+    font-size: 14px;
+    color: #4b5563;
+  }
+  .entry-body .line {
+    margin-bottom: 4px;
+  }
+  .entry-body .tag {
+    display: inline-block;
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-right: 4px;
+    margin-top: 2px;
+  }
+  .empty {
+    text-align: center;
+    color: #9ca3af;
+    padding: 24px 0;
+    font-size: 14px;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #0f766e;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Pollentagebuch</h1>
+    <p>Täglich Symptome & Medikamente erfassen</p>
+  </header>
+
+  <form id="entryForm" class="card">
+    <h2>Neuer Tageseintrag</h2>
+
+    <div class="field">
+      <label class="lbl" for="date">Datum</label>
+      <input type="date" id="date" required>
+    </div>
+
+    <div class="field">
+      <label class="lbl">OralAir 300 eingenommen?</label>
+      <div class="toggle">
+        <input type="radio" name="oralair" id="oralair-ja" value="ja" checked>
+        <label for="oralair-ja">Ja</label>
+        <input type="radio" name="oralair" id="oralair-nein" value="nein">
+        <label for="oralair-nein">Nein</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Zirtec Tropfen</label>
+      <div class="med-row">
+        <label class="chk" for="zirtec-morgens">
+          <input type="checkbox" id="zirtec-morgens">
+          <span>Morgens</span>
+        </label>
+        <input type="number" id="zirtec-morgens-menge" class="drops" value="12" min="0" max="99">
+        <span class="unit">Tropfen</span>
+      </div>
+      <div class="med-row">
+        <label class="chk" for="zirtec-abends">
+          <input type="checkbox" id="zirtec-abends">
+          <span>Abends</span>
+        </label>
+        <input type="number" id="zirtec-abends-menge" class="drops" value="12" min="0" max="99">
+        <span class="unit">Tropfen</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="weitereMed">Weitere Medikamente</label>
+      <input type="text" id="weitereMed" placeholder="z. B. Visuglucan Augentropfen">
+    </div>
+
+    <div class="field">
+      <label class="lbl">Symptome</label>
+      <div class="pills" id="symptomePills">
+        <input type="checkbox" id="s1" value="verstopfte Nase">
+        <label for="s1">verstopfte Nase</label>
+        <input type="checkbox" id="s2" value="Nase juckt">
+        <label for="s2">Nase juckt</label>
+        <input type="checkbox" id="s3" value="Augen jucken">
+        <label for="s3">Augen jucken</label>
+        <input type="checkbox" id="s4" value="Husten">
+        <label for="s4">Husten</label>
+        <input type="checkbox" id="s5" value="Fieber">
+        <label for="s5">Fieber</label>
+        <input type="checkbox" id="s6" value="Ohren-/Stirnschmerzen">
+        <label for="s6">Ohren-/Stirnschmerzen</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="sonstigesSymptom">Sonstige Symptome</label>
+      <input type="text" id="sonstigesSymptom" placeholder="Freitext">
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="notiz">Ereignis / Notiz</label>
+      <textarea id="notiz" placeholder="z. B. Spaziergang im Park, Wetter, besondere Belastung ..."></textarea>
+    </div>
+
+    <button type="submit" class="primary">Eintrag speichern</button>
+  </form>
+
+  <div class="card">
+    <div class="cal-header">
+      <button type="button" class="cal-nav" id="calPrev">←</button>
+      <span class="month" id="calMonth"></span>
+      <button type="button" class="cal-nav" id="calNext">→</button>
+    </div>
+    <div id="entryList"></div>
+    <div class="cal-legend">
+      <span class="it"><span class="sw" style="background:#ecfdf5;border-color:#6ee7b7;"></span>Eintrag ohne Symptome</span>
+      <span class="it"><span class="sw" style="background:#fef3c7;border-color:#fbbf24;"></span>1–2 Symptome</span>
+      <span class="it"><span class="sw" style="background:#fecaca;border-color:#f87171;"></span>3+ Symptome</span>
+      <span class="it"><span class="sw" style="background:#fff;box-shadow:inset 0 0 0 2px #0f766e;"></span>heute</span>
+    </div>
+  </div>
+
+  <form id="pollenForm" class="card">
+    <h2>Pollenbericht erfassen</h2>
+    <p style="font-size:12px;color:#6b7280;margin-top:-8px;margin-bottom:14px;">Wöchentlicher Bericht der Provinz Bozen</p>
+
+    <div class="row">
+      <div class="field">
+        <label class="lbl" for="pollenFrom">Von</label>
+        <input type="date" id="pollenFrom" required>
+      </div>
+      <div class="field">
+        <label class="lbl" for="pollenTo">Bis</label>
+        <input type="date" id="pollenTo" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Pollenbelastung pro Tag</label>
+      <div class="legend">
+        <span class="item"><span class="sw" style="background:#fff"></span>keine</span>
+        <span class="item"><span class="sw" style="background:#fde68a;border-color:#f59e0b"></span>niedrig</span>
+        <span class="item"><span class="sw" style="background:#fb923c;border-color:#ea580c"></span>mittel</span>
+        <span class="item"><span class="sw" style="background:#ef4444;border-color:#b91c1c"></span>hoch</span>
+      </div>
+      <p class="hint">Tippen zum Wechseln: keine → niedrig → mittel → hoch</p>
+      <div class="pollen-grid" id="pollenGrid"></div>
+      <div class="type-add">
+        <input type="text" id="newTypeInput" placeholder="Neue Pollenart (z. B. Hopfenbuche)">
+        <button type="button" id="addTypeBtn">+ Pollenart</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label class="lbl" for="pollenPm3">P/m³ Gesamt (Woche)</label>
+        <input type="number" id="pollenPm3" min="0" placeholder="0">
+      </div>
+      <div class="field">
+        <label class="lbl" for="pollenTendenz">Tendenz</label>
+        <select id="pollenTendenz">
+          <option value="gleichbleibend">→ gleichbleibend</option>
+          <option value="steigend">↑ steigend</option>
+          <option value="sinkend">↓ sinkend</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="primary">Pollenbericht speichern</button>
+  </form>
+
+  <div class="card">
+    <button type="button" class="secondary" id="togglePollenList" style="margin-top:0;">▸ Gespeicherte Pollenberichte anzeigen</button>
+    <div id="pollenList" style="display:none;margin-top:14px;"></div>
+    <button type="button" class="secondary" id="reportBtn">📋 Arztbericht erstellen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Gespeichert ✓</div>
+
+<div class="modal-bg" id="entryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="modalTitle"></span>
+      <button type="button" class="modal-close" id="modalClose">×</button>
+    </div>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button type="button" id="modalDelete">Eintrag löschen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'pollentagebuch.entries';
+  const form = document.getElementById('entryForm');
+  const dateInput = document.getElementById('date');
+  const entryList = document.getElementById('entryList');
+  const toast = document.getElementById('toast');
+
+  // Heute vorausfüllen
+  function todayISO() {
+    const d = new Date();
+    const off = d.getTimezoneOffset();
+    return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
+  }
+  dateInput.value = todayISO();
+
+  function loadEntries() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function saveEntries(entries) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  // ===== Kalenderansicht =====
+  let calYear, calMonth;
+  (function initCalMonth() {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+  })();
+
+  const MONTH_NAMES = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const CAL_DAYS = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+
+  function renderEntries() {
+    const entries = loadEntries();
+    const byDate = {};
+    entries.forEach(e => byDate[e.date] = e);
+
+    document.getElementById('calMonth').textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+
+    // Erster Tag des Monats
+    const first = new Date(calYear, calMonth, 1);
+    // Mo=0, So=6
+    const startWd = (first.getDay() + 6) % 7;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayISOStr = todayISO();
+
+    let html = '<div class="calendar">';
+    CAL_DAYS.forEach(d => html += '<div class="wd">' + d + '</div>');
+
+    // Leere Zellen vor Monatsbeginn
+    for (let i = 0; i < startWd; i++) html += '<div class="day"></div>';
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const iso = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      const entry = byDate[iso];
+      let cls = 'day in-month';
+      if (entry) {
+        const nSym = (entry.symptome || []).length + (entry.sonstigesSymptom ? 1 : 0);
+        if (nSym === 0) cls += ' has-entry';
+        else if (nSym <= 2) cls += ' has-entry has-sym';
+        else cls += ' has-entry has-sym-many';
+      }
+      if (iso === todayISOStr) cls += ' today';
+      const clickable = entry ? ' data-iso="' + iso + '"' : '';
+      html += '<div class="' + cls + '"' + clickable + '>' + d + '</div>';
+    }
+
+    // Auf 6 Zeilen auffüllen
+    const totalCells = startWd + daysInMonth;
+    const trailing = (7 - (totalCells % 7)) % 7;
+    for (let i = 0; i < trailing; i++) html += '<div class="day"></div>';
+
+    html += '</div>';
+    entryList.innerHTML = html;
+
+    entryList.querySelectorAll('.day.has-entry').forEach(cell => {
+      cell.addEventListener('click', () => openEntryModal(cell.getAttribute('data-iso')));
+    });
+  }
+
+  document.getElementById('calPrev').addEventListener('click', () => {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderEntries();
+  });
+  document.getElementById('calNext').addEventListener('click', () => {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderEntries();
+  });
+
+  // ===== Eintrags-Modal =====
+  const modal = document.getElementById('entryModal');
+  let modalEntryId = null;
+
+  function openEntryModal(iso) {
+    const entry = loadEntries().find(e => e.date === iso);
+    if (!entry) return;
+    modalEntryId = entry.id;
+    document.getElementById('modalTitle').textContent = formatDate(iso);
+
+    const meds = [];
+    if (entry.oralair === 'ja') meds.push('OralAir');
+    else meds.push('<span style="color:#dc2626;">OralAir ausgesetzt</span>');
+    if (entry.zirtecMorgens) meds.push('Zirtec morgens ' + (entry.zirtecMorgensMenge ?? 12) + ' Tr.');
+    if (entry.zirtecAbends) meds.push('Zirtec abends ' + (entry.zirtecAbendsMenge ?? 12) + ' Tr.');
+    if (entry.weitereMed) meds.push(escapeHtml(entry.weitereMed));
+
+    const allSym = [...(entry.symptome || [])];
+    if (entry.sonstigesSymptom) allSym.push(entry.sonstigesSymptom);
+
+    // Pollenbelastung für diesen Tag (falls vorhanden)
+    const pollenByDate = buildPollenByDate();
+    const loads = pollenByDate[iso];
+    let pollenHtml = '';
+    if (loads) {
+      const items = [];
+      Object.keys(loads).forEach(p => {
+        const lvl = loads[p];
+        if (lvl >= 2) {
+          const bg = LEVELS[lvl] === 'hoch' ? '#ef4444' : '#fb923c';
+          const col = '#fff';
+          items.push('<span class="pitem" style="background:' + bg + ';color:' + col + ';">' + escapeHtml(p) + ' (' + LEVELS[lvl] + ')</span>');
+        } else if (lvl === 1) {
+          items.push('<span class="pitem" style="background:#fde68a;color:#78350f;">' + escapeHtml(p) + '</span>');
+        }
+      });
+      if (items.length) {
+        pollenHtml = '<div class="modal-pollen"><strong style="display:block;font-size:11px;color:#6b7280;text-transform:uppercase;margin-bottom:6px;">Pollenbelastung an diesem Tag</strong><div class="plist">' + items.join('') + '</div></div>';
+      }
+    }
+
+    document.getElementById('modalBody').innerHTML =
+        '<div class="modal-section"><strong>Medikamente</strong>' + (meds.length ? meds.join(' · ') : '—') + '</div>'
+      + '<div class="modal-section"><strong>Symptome</strong>' + (allSym.length ? allSym.map(s => '<span class="tag">' + escapeHtml(s) + '</span>').join('') : '<em style="color:#9ca3af;">Keine Symptome</em>') + '</div>'
+      + (entry.notiz ? '<div class="modal-section"><strong>Ereignis / Notiz</strong>' + escapeHtml(entry.notiz) + '</div>' : '')
+      + pollenHtml;
+
+    modal.classList.add('show');
+  }
+
+  function closeEntryModal() {
+    modal.classList.remove('show');
+    modalEntryId = null;
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeEntryModal);
+  modal.addEventListener('click', (ev) => { if (ev.target === modal) closeEntryModal(); });
+  document.getElementById('modalDelete').addEventListener('click', () => {
+    if (!modalEntryId) return;
+    if (!confirm('Diesen Eintrag wirklich löschen?')) return;
+    saveEntries(loadEntries().filter(e => e.id !== modalEntryId));
+    closeEntryModal();
+    renderEntries();
+    showToast('Gelöscht');
+  });
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+
+    const symptome = Array.from(document.querySelectorAll('#symptomePills input:checked'))
+      .map(i => i.value);
+
+    const entry = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      date: dateInput.value,
+      oralair: document.querySelector('input[name="oralair"]:checked').value,
+      zirtecMorgens: document.getElementById('zirtec-morgens').checked,
+      zirtecMorgensMenge: Math.max(0, parseInt(document.getElementById('zirtec-morgens-menge').value, 10) || 0),
+      zirtecAbends: document.getElementById('zirtec-abends').checked,
+      zirtecAbendsMenge: Math.max(0, parseInt(document.getElementById('zirtec-abends-menge').value, 10) || 0),
+      weitereMed: document.getElementById('weitereMed').value.trim(),
+      symptome: symptome,
+      sonstigesSymptom: document.getElementById('sonstigesSymptom').value.trim(),
+      notiz: document.getElementById('notiz').value.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    const entries = loadEntries();
+    // Eintrag für dasselbe Datum überschreiben
+    const existingIdx = entries.findIndex(e => e.date === entry.date);
+    if (existingIdx >= 0) {
+      if (!confirm('Für dieses Datum existiert bereits ein Eintrag. Überschreiben?')) return;
+      entries[existingIdx] = entry;
+    } else {
+      entries.push(entry);
+    }
+    saveEntries(entries);
+
+    // Formular zurücksetzen (außer Datum)
+    document.getElementById('zirtec-morgens').checked = false;
+    document.getElementById('zirtec-abends').checked = false;
+    document.getElementById('zirtec-morgens-menge').value = 12;
+    document.getElementById('zirtec-abends-menge').value = 12;
+    document.getElementById('weitereMed').value = '';
+    document.querySelectorAll('#symptomePills input').forEach(i => i.checked = false);
+    document.getElementById('sonstigesSymptom').value = '';
+    document.getElementById('notiz').value = '';
+    document.getElementById('oralair-ja').checked = true;
+
+    renderEntries();
+    showToast('Gespeichert ✓');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ============================================================
+  // TESTDATEN (nur beim ersten Start, wenn localStorage leer ist)
+  // ============================================================
+  function seedIfEmpty() {
+    if (localStorage.getItem(STORAGE_KEY) !== null) return;
+
+    const mk = (date, opts) => ({
+      id: 'seed-' + date,
+      date: date,
+      oralair: opts.oralair,
+      zirtecMorgens: !!opts.zm,
+      zirtecMorgensMenge: opts.zm || 0,
+      zirtecAbends: !!opts.za,
+      zirtecAbendsMenge: opts.za || 0,
+      weitereMed: opts.weitereMed || '',
+      symptome: opts.symptome || [],
+      sonstigesSymptom: '',
+      notiz: opts.notiz || '',
+      createdAt: new Date(date).toISOString()
+    });
+
+    // Hilfsfunktion: Datumsbereich (inklusive) expandieren
+    const range = (fromISO, toISO, opts) => {
+      const out = [];
+      const d = new Date(fromISO);
+      const end = new Date(toISO);
+      while (d <= end) {
+        const iso = d.toISOString().slice(0, 10);
+        out.push(mk(iso, opts));
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    };
+
+    const seed = [
+      // März: OralAir, noch kein Zirtec
+      mk('2026-03-01', { oralair: 'ja' }),
+      ...range('2026-03-02', '2026-03-07', { oralair: 'ja' }),
+      mk('2026-03-08', { oralair: 'ja', symptome: ['Nase juckt', 'verstopfte Nase'], notiz: 'Wandern in Mölten' }),
+
+      // Ab 09.03: Zirtec 12 Tr. morgens
+      mk('2026-03-09', { oralair: 'ja', zm: 12, symptome: ['verstopfte Nase'] }),
+      ...range('2026-03-10', '2026-03-18', { oralair: 'ja', zm: 12 }),
+      mk('2026-03-19', { oralair: 'ja', zm: 12, symptome: ['Fieber'] }),
+      mk('2026-03-20', { oralair: 'ja', zm: 12, symptome: ['Fieber'] }),
+      ...range('2026-03-21', '2026-03-22', { oralair: 'ja', zm: 12 }),
+      ...range('2026-03-23', '2026-03-31', { oralair: 'ja', zm: 12, symptome: ['verstopfte Nase'] }),
+
+      // April
+      ...range('2026-04-01', '2026-04-03', { oralair: 'ja', zm: 12, symptome: ['verstopfte Nase'] }),
+      ...range('2026-04-04', '2026-04-05', { oralair: 'ja', zm: 12, symptome: ['verstopfte Nase'], notiz: 'durch Infekt/Erkältung' }),
+
+      // 06.–07.04: OralAir pausiert, Zirtec auf abends umgestellt, Infekt mit Husten & leichten Ohren-/Stirnschmerzen
+      mk('2026-04-06', { oralair: 'nein', za: 12, symptome: ['verstopfte Nase', 'Husten', 'Ohren-/Stirnschmerzen'], notiz: 'durch Infekt/Erkältung, leichte Ohren-/Stirnschmerzen' }),
+      mk('2026-04-07', { oralair: 'nein', za: 12, symptome: ['verstopfte Nase', 'Husten', 'Ohren-/Stirnschmerzen'], notiz: 'durch Infekt/Erkältung, leichte Ohren-/Stirnschmerzen' }),
+
+      // 08.04: OralAir wieder, Zirtec morgens UND abends
+      mk('2026-04-08', { oralair: 'ja', zm: 12, za: 12, symptome: ['verstopfte Nase', 'Husten', 'Ohren-/Stirnschmerzen'], notiz: 'durch Infekt/Erkältung, leichte Ohren-/Stirnschmerzen' }),
+
+      // 09.04: juckendes Auge + Visuglucan
+      mk('2026-04-09', { oralair: 'ja', zm: 12, za: 12, symptome: ['Augen jucken'], weitereMed: '1 Tropfen Visuglucan' })
+    ];
+    saveEntries(seed);
+  }
+  seedIfEmpty();
+
+  renderEntries();
+
+  // ============================================================
+  // POLLENBERICHTE (Phase 2)
+  // ============================================================
+  const POLLEN_KEY = 'pollentagebuch.pollen';
+  const POLLEN_TYPES_KEY = 'pollentagebuch.pollenTypes';
+  const DEFAULT_POLLEN_TYPES = [
+    'Erle', 'Hasel', 'Zypressen-/Eibengewächse', 'Ulme', 'Pappel', 'Weide', 'Gemeine Esche',
+    'Birke', 'Hopfenbuche', 'Süßgräser', 'Hainbuche', 'Manna-Esche'
+  ];
+  const LEVELS = ['keine', 'niedrig', 'mittel', 'hoch'];
+  const DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+  function loadPollenTypes() {
+    try {
+      const s = JSON.parse(localStorage.getItem(POLLEN_TYPES_KEY));
+      if (Array.isArray(s) && s.length) return s;
+    } catch(e) {}
+    return DEFAULT_POLLEN_TYPES.slice();
+  }
+  function savePollenTypes() {
+    localStorage.setItem(POLLEN_TYPES_KEY, JSON.stringify(POLLEN_TYPES));
+  }
+  let POLLEN_TYPES = loadPollenTypes();
+
+  function loadPollen() {
+    try { return JSON.parse(localStorage.getItem(POLLEN_KEY)) || []; }
+    catch(e) { return []; }
+  }
+  function savePollen(arr) {
+    localStorage.setItem(POLLEN_KEY, JSON.stringify(arr));
+  }
+
+  const pollenGridEl = document.getElementById('pollenGrid');
+  const pollenFrom = document.getElementById('pollenFrom');
+  const pollenTo = document.getElementById('pollenTo');
+  let gridState = {};
+
+  function resetGrid() {
+    gridState = {};
+    POLLEN_TYPES.forEach(p => gridState[p] = [0,0,0,0,0,0,0]);
+  }
+
+  function renderGrid() {
+    pollenGridEl.innerHTML = '';
+    const corner = document.createElement('div');
+    corner.className = 'head';
+    pollenGridEl.appendChild(corner);
+    DAYS.forEach(d => {
+      const h = document.createElement('div');
+      h.className = 'head';
+      h.textContent = d;
+      pollenGridEl.appendChild(h);
+    });
+    POLLEN_TYPES.forEach(p => {
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = p;
+      pollenGridEl.appendChild(name);
+      for (let i = 0; i < 7; i++) {
+        const cell = document.createElement('div');
+        const lvl = gridState[p][i];
+        cell.className = 'cell l-' + LEVELS[lvl];
+        cell.textContent = LEVELS[lvl].charAt(0);
+        cell.addEventListener('click', () => {
+          gridState[p][i] = (gridState[p][i] + 1) % 4;
+          const n = gridState[p][i];
+          cell.className = 'cell l-' + LEVELS[n];
+          cell.textContent = LEVELS[n].charAt(0);
+        });
+        pollenGridEl.appendChild(cell);
+      }
+    });
+  }
+
+  pollenFrom.addEventListener('change', () => {
+    if (pollenFrom.value) {
+      const d = new Date(pollenFrom.value);
+      d.setDate(d.getDate() + 6);
+      pollenTo.value = d.toISOString().slice(0, 10);
+    }
+  });
+
+  function renderPollenList() {
+    const list = document.getElementById('pollenList');
+    const reports = loadPollen().sort((a, b) => b.from.localeCompare(a.from));
+    if (reports.length === 0) {
+      list.innerHTML = '<div class="empty">Noch keine Pollenberichte erfasst.</div>';
+      return;
+    }
+    list.innerHTML = reports.map(r => {
+      let mini = '<div class="pollen-mini"><div class="head"></div>';
+      DAYS.forEach(d => mini += '<div class="head">' + d + '</div>');
+      POLLEN_TYPES.forEach(p => {
+        mini += '<div class="name">' + escapeHtml(p) + '</div>';
+        const levels = (r.pollen && r.pollen[p]) || [0,0,0,0,0,0,0];
+        levels.forEach(lvl => {
+          mini += '<div class="cell l-' + LEVELS[lvl] + '"></div>';
+        });
+      });
+      mini += '</div>';
+      const tendArrow = { steigend: '↑', gleichbleibend: '→', sinkend: '↓' }[r.tendenz] || '';
+      return '<div class="pollen-entry">'
+        + '<div class="pollen-entry-head">'
+        + '<span class="period">' + formatDateShort(r.from) + ' – ' + formatDateShort(r.to) + '</span>'
+        + '<button class="entry-del" data-id="' + r.id + '">Löschen</button>'
+        + '</div>'
+        + '<div class="pollen-entry-meta">'
+        + (r.pm3Total ? '<strong>' + r.pm3Total + '</strong> P/m³ · ' : '')
+        + 'Tendenz: ' + tendArrow + ' ' + r.tendenz
+        + '</div>'
+        + mini
+        + '</div>';
+    }).join('');
+    list.querySelectorAll('.entry-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('Diesen Pollenbericht wirklich löschen?')) return;
+        savePollen(loadPollen().filter(r => r.id !== btn.getAttribute('data-id')));
+        renderPollenList();
+      });
+    });
+  }
+
+  document.getElementById('pollenForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    if (!pollenFrom.value || !pollenTo.value) return;
+    const pollenData = {};
+    POLLEN_TYPES.forEach(p => pollenData[p] = gridState[p].slice());
+    const report = {
+      id: 'p-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      from: pollenFrom.value,
+      to: pollenTo.value,
+      pollen: pollenData,
+      pm3Total: parseInt(document.getElementById('pollenPm3').value, 10) || 0,
+      tendenz: document.getElementById('pollenTendenz').value,
+      createdAt: new Date().toISOString()
+    };
+    const reports = loadPollen();
+    const idx = reports.findIndex(r => r.from === report.from);
+    if (idx >= 0) {
+      if (!confirm('Für diese Woche existiert bereits ein Bericht. Überschreiben?')) return;
+      reports[idx] = report;
+    } else {
+      reports.push(report);
+    }
+    savePollen(reports);
+    resetGrid();
+    renderGrid();
+    pollenFrom.value = '';
+    pollenTo.value = '';
+    document.getElementById('pollenPm3').value = '';
+    document.getElementById('pollenTendenz').value = 'gleichbleibend';
+    renderPollenList();
+    showToast('Pollenbericht gespeichert ✓');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  resetGrid();
+  renderGrid();
+
+  // Neue Pollenart hinzufügen
+  document.getElementById('addTypeBtn').addEventListener('click', () => {
+    const input = document.getElementById('newTypeInput');
+    const name = input.value.trim();
+    if (!name) return;
+    if (POLLEN_TYPES.some(t => t.toLowerCase() === name.toLowerCase())) {
+      alert('Diese Pollenart existiert bereits.');
+      return;
+    }
+    POLLEN_TYPES.push(name);
+    savePollenTypes();
+    gridState[name] = [0,0,0,0,0,0,0];
+    renderGrid();
+    input.value = '';
+    showToast('Pollenart hinzugefügt ✓');
+  });
+
+  // ========== SEED für Pollenberichte (nur wenn leer) ==========
+  function seedPollenIfEmpty() {
+    if (localStorage.getItem(POLLEN_KEY) !== null) return;
+    // Level-Index: 0=keine, 1=niedrig, 2=mittel, 3=hoch
+    // Reihenfolge in arr: Mo Di Mi Do Fr Sa So
+    // Reihenfolge der Pollenarten in POLLEN_TYPES:
+    //  0 Erle, 1 Hasel, 2 Zypressen, 3 Ulme, 4 Pappel, 5 Weide, 6 Esche,
+    //  7 Birke, 8 Hopfenbuche, 9 Süßgräser, 10 Hainbuche, 11 Manna-Esche
+    const seed = [
+      {
+        id: 'p-seed-1', from: '2026-03-16', to: '2026-03-22',
+        pm3Total: 342 + 35.2 + 6.9 + 6.5 + 6.1 + 4.2 + 3.9 + 3.3 + 2.1 + 0.3,
+        tendenz: 'gleichbleibend',
+        pollen: {
+          'Pappel':                       [3,3,3,3,3,3,1],
+          'Birke':                        [2,3,3,3,1,1,1],
+          'Zypressen-/Eibengewächse':     [0,0,1,1,0,0,1],
+          'Ulme':                         [1,1,1,1,1,1,0],
+          'Hopfenbuche':                  [1,1,2,0,0,0,0],
+          'Gemeine Esche':                [1,2,2,1,1,1,1],
+          'Hasel':                        [0,1,1,1,1,1,0],
+          'Weide':                        [1,1,1,1,1,1,1],
+          'Erle':                         [1,1,1,1,1,1,1],
+          'Süßgräser':                    [0,0,1,0,1,0,0]
+        },
+        createdAt: '2026-03-25T00:00:00.000Z'
+      },
+      {
+        id: 'p-seed-2', from: '2026-03-23', to: '2026-03-29',
+        pm3Total: 81.7 + 51.6 + 6.7 + 5.6 + 3.2 + 2.4 + 2.4 + 2.3 + 1.2 + 0.6,
+        tendenz: 'steigend',
+        pollen: {
+          'Birke':                        [2,3,3,3,2,3,3],
+          'Pappel':                       [3,3,3,1,1,1,1],
+          'Zypressen-/Eibengewächse':     [1,1,1,1,0,0,1],
+          'Erle':                         [1,1,1,2,1,1,1],
+          'Hasel':                        [1,1,1,1,1,1,1],
+          'Ulme':                         [1,1,1,1,1,1,0],
+          'Weide':                        [1,1,1,1,1,1,1],
+          'Hopfenbuche':                  [0,1,1,1,1,1,1],
+          'Gemeine Esche':                [1,1,1,1,1,1,1],
+          'Hainbuche':                    [1,1,1,0,0,0,1]
+        },
+        createdAt: '2026-03-31T00:00:00.000Z'
+      },
+      {
+        id: 'p-seed-3', from: '2026-03-30', to: '2026-04-05',
+        pm3Total: 189.6 + 18.6 + 11.7 + 10 + 5.1 + 1.8 + 1.1 + 0.9 + 0.9 + 0.3 + 0.1,
+        tendenz: 'gleichbleibend',
+        pollen: {
+          'Birke':                        [3,2,2,3,3,3,3],
+          'Pappel':                       [1,1,1,1,2,2,1],
+          'Hopfenbuche':                  [1,1,1,1,1,1,3],
+          'Zypressen-/Eibengewächse':     [0,0,0,1,1,1,1],
+          'Gemeine Esche':                [1,1,0,1,2,2,1],
+          'Ulme':                         [0,1,1,0,1,0,0],
+          'Weide':                        [1,0,0,1,0,1,1],
+          'Süßgräser':                    [1,1,1,1,0,1,0],
+          'Erle':                         [1,1,1,1,1,0,1],
+          'Hainbuche':                    [1,1,1,1,1,1,1],
+          'Manna-Esche':                  [0,0,0,0,0,0,1]
+        },
+        createdAt: '2026-04-08T00:00:00.000Z'
+      }
+    ];
+    savePollen(seed);
+  }
+  seedPollenIfEmpty();
+
+  renderPollenList();
+
+  // Pollenberichte-Liste ein-/ausklappen
+  document.getElementById('togglePollenList').addEventListener('click', () => {
+    const list = document.getElementById('pollenList');
+    const btn = document.getElementById('togglePollenList');
+    const open = list.style.display !== 'none';
+    if (open) {
+      list.style.display = 'none';
+      btn.textContent = '▸ Gespeicherte Pollenberichte anzeigen';
+    } else {
+      list.style.display = 'block';
+      btn.textContent = '▾ Gespeicherte Pollenberichte ausblenden';
+    }
+  });
+
+  // Datum → {Pollenart: level-index} Map aus allen Berichten
+  function buildPollenByDate() {
+    const map = {};
+    loadPollen().forEach(r => {
+      const start = new Date(r.from);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const iso = d.toISOString().slice(0, 10);
+        if (!map[iso]) map[iso] = {};
+        POLLEN_TYPES.forEach(p => {
+          const lvl = (r.pollen && r.pollen[p] && r.pollen[p][i] != null) ? r.pollen[p][i] : 0;
+          map[iso][p] = lvl;
+        });
+      }
+    });
+    return map;
+  }
+
+  function buildPollenCorrelation(entries) {
+    const pollenByDate = buildPollenByDate();
+    if (Object.keys(pollenByDate).length === 0) return null;
+    const entryByDate = {};
+    entries.forEach(e => entryByDate[e.date] = e);
+
+    const result = {};
+    POLLEN_TYPES.forEach(p => {
+      result[p] = {
+        mittel: { days: 0, withSymptoms: 0, symptomCount: {} },
+        hoch:   { days: 0, withSymptoms: 0, symptomCount: {} }
+      };
+    });
+
+    Object.keys(pollenByDate).forEach(date => {
+      const loads = pollenByDate[date];
+      const entry = entryByDate[date];
+      const symptoms = entry ? [...(entry.symptome || [])] : [];
+      POLLEN_TYPES.forEach(p => {
+        const lvlName = LEVELS[loads[p] || 0];
+        if (lvlName === 'mittel' || lvlName === 'hoch') {
+          const bucket = result[p][lvlName];
+          bucket.days++;
+          if (symptoms.length > 0) {
+            bucket.withSymptoms++;
+            symptoms.forEach(s => {
+              bucket.symptomCount[s] = (bucket.symptomCount[s] || 0) + 1;
+            });
+          }
+        }
+      });
+    });
+    return result;
+  }
+
+  // ============================================================
+  // ARZTBERICHT
+  // ============================================================
+  document.getElementById('reportBtn').addEventListener('click', () => {
+    const entries = loadEntries().sort((a, b) => a.date.localeCompare(b.date));
+    if (entries.length === 0) {
+      alert('Keine Einträge vorhanden. Bitte zuerst Tageseinträge erfassen.');
+      return;
+    }
+    const html = buildReportHtml(entries);
+    const w = window.open('', '_blank');
+    if (!w) {
+      alert('Bitte Popup-Blocker für diese Seite deaktivieren.');
+      return;
+    }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  });
+
+  function formatDateShort(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function formatDateLong(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function analyzeMedicationCourse(entries) {
+    // Änderungen der Zirtec-Dosis erkennen (pro Slot: morgens / abends)
+    const changes = [];
+    ['Morgens', 'Abends'].forEach(slot => {
+      const key = 'zirtec' + slot;
+      const mengeKey = key + 'Menge';
+      let prevDose = null;
+      entries.forEach(e => {
+        const taken = e[key];
+        const dose = taken ? (e[mengeKey] ?? 12) : 0;
+        if (prevDose === null) {
+          if (dose > 0) {
+            changes.push({ date: e.date, slot: slot.toLowerCase(), from: 0, to: dose, text: 'Start ' + slot.toLowerCase() + ' mit ' + dose + ' Tropfen' });
+          }
+        } else if (dose !== prevDose) {
+          let text;
+          if (dose === 0) text = slot + ' ausgesetzt (vorher ' + prevDose + ' Tr.)';
+          else if (prevDose === 0) text = slot + ' wieder aufgenommen mit ' + dose + ' Tropfen';
+          else if (dose > prevDose) text = slot + ' erhöht: ' + prevDose + ' → ' + dose + ' Tropfen';
+          else text = slot + ' reduziert: ' + prevDose + ' → ' + dose + ' Tropfen';
+          changes.push({ date: e.date, slot: slot.toLowerCase(), from: prevDose, to: dose, text: text });
+        }
+        prevDose = dose;
+      });
+    });
+    changes.sort((a, b) => a.date.localeCompare(b.date));
+    return changes;
+  }
+
+  function buildPollenSectionHtml(entries) {
+    const corr = buildPollenCorrelation(entries);
+    if (!corr) {
+      return '<div class="note"><strong>Hinweis:</strong> Noch keine Pollenberichte erfasst. '
+        + 'Sobald Pollenberichte der Provinz Bozen eingetragen sind, erscheint hier die Korrelation '
+        + 'zwischen Pollenbelastung und den dokumentierten Symptomen.</div>';
+    }
+
+    let hasAny = false;
+    let rows = '';
+    POLLEN_TYPES.forEach(p => {
+      ['mittel', 'hoch'].forEach(lvl => {
+        const d = corr[p][lvl];
+        if (d.days === 0) return;
+        hasAny = true;
+        const topSymptome = Object.entries(d.symptomCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4)
+          .map(([s, c]) => escapeHtml(s) + ' (' + c + ')')
+          .join(', ') || '–';
+        const pct = d.days > 0 ? Math.round((d.withSymptoms / d.days) * 100) : 0;
+        const lvlBadge = lvl === 'hoch'
+          ? '<span style="background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:3px;font-weight:600;">hoch</span>'
+          : '<span style="background:#ffedd5;color:#9a3412;padding:1px 6px;border-radius:3px;font-weight:600;">mittel</span>';
+        rows += '<tr>'
+          + '<td>' + escapeHtml(p) + '</td>'
+          + '<td class="c">' + lvlBadge + '</td>'
+          + '<td class="c">' + d.days + '</td>'
+          + '<td class="c">' + d.withSymptoms + ' (' + pct + '%)</td>'
+          + '<td>' + topSymptome + '</td>'
+          + '</tr>';
+      });
+    });
+
+    if (!hasAny) {
+      return '<p class="muted">Im erfassten Zeitraum gab es keine Tage mit mittlerer oder hoher Pollenbelastung.</p>';
+    }
+
+    // Stärkste Korrelation herausheben
+    let strongest = null;
+    POLLEN_TYPES.forEach(p => {
+      ['mittel', 'hoch'].forEach(lvl => {
+        const d = corr[p][lvl];
+        if (d.days < 2) return;
+        const pct = d.withSymptoms / d.days;
+        if (!strongest || pct > strongest.pct) {
+          const top = Object.entries(d.symptomCount).sort((a, b) => b[1] - a[1])[0];
+          strongest = { pollen: p, lvl: lvl, pct: pct, pctStr: Math.round(pct * 100), topSymptom: top ? top[0] : null, topCount: top ? top[1] : 0 };
+        }
+      });
+    });
+
+    let highlight = '';
+    if (strongest && strongest.topSymptom) {
+      highlight = '<div class="note" style="background:#ecfdf5;border-left-color:#0f766e;">'
+        + '<strong>Stärkste Korrelation:</strong> '
+        + escapeHtml(strongest.pollen) + ' (' + strongest.lvl + ') → '
+        + escapeHtml(strongest.topSymptom) + ' '
+        + '— an ' + strongest.pctStr + '% der Tage mit dieser Belastung traten Symptome auf.'
+        + '</div>';
+    }
+
+    return highlight
+      + '<table><thead><tr>'
+      + '<th>Pollenart</th><th>Belastung</th><th>Tage</th><th>davon mit Symptomen</th><th>Häufigste Symptome</th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<p class="meta" style="margin-top:6px;">Berücksichtigt werden Tage mit mittlerer oder hoher Belastung, '
+      + 'an denen ein Tageseintrag vorhanden ist. Mehrere Symptome pro Tag werden einzeln gezählt.</p>';
+  }
+
+  function buildReportHtml(entries) {
+    const patientName = localStorage.getItem('pollentagebuch.patientName') || 'Patient';
+    const today = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const periodFrom = formatDateShort(entries[0].date);
+    const periodTo = formatDateShort(entries[entries.length - 1].date);
+
+    // Tabelle
+    const tableRows = entries.map(e => {
+      const zirtec = [];
+      if (e.zirtecMorgens) zirtec.push('M: ' + (e.zirtecMorgensMenge ?? 12));
+      if (e.zirtecAbends) zirtec.push('A: ' + (e.zirtecAbendsMenge ?? 12));
+      const zirtecStr = zirtec.length ? zirtec.join(' / ') : '–';
+      const symptome = [...(e.symptome || [])];
+      if (e.sonstigesSymptom) symptome.push(e.sonstigesSymptom);
+      const symptomStr = symptome.length ? symptome.join(', ') : '—';
+      return '<tr>'
+        + '<td>' + formatDateShort(e.date) + '</td>'
+        + '<td class="c">' + (e.oralair === 'ja' ? '✓' : '–') + '</td>'
+        + '<td>' + zirtecStr + '</td>'
+        + '<td>' + (e.weitereMed ? escapeHtml(e.weitereMed) : '–') + '</td>'
+        + '<td>' + escapeHtml(symptomStr) + '</td>'
+        + '<td>' + (e.notiz ? escapeHtml(e.notiz) : '') + '</td>'
+        + '</tr>';
+    }).join('');
+
+    // Symptom-Häufigkeit
+    const symptomCount = {};
+    entries.forEach(e => {
+      (e.symptome || []).forEach(s => { symptomCount[s] = (symptomCount[s] || 0) + 1; });
+    });
+    const symptomSummary = Object.entries(symptomCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([s, c]) => '<li>' + escapeHtml(s) + ': <strong>' + c + ' Tag(e)</strong></li>')
+      .join('');
+
+    // Medikamentenverlauf
+    const medChanges = analyzeMedicationCourse(entries);
+    const medChangesHtml = medChanges.length
+      ? '<ul>' + medChanges.map(c => '<li><strong>' + formatDateShort(c.date) + ':</strong> ' + escapeHtml(c.text) + '</li>').join('') + '</ul>'
+      : '<p class="muted">Keine Dosisänderungen im erfassten Zeitraum.</p>';
+
+    // Durchschnittliche Tagesdosis Zirtec
+    let totalDrops = 0, daysWithZirtec = 0;
+    entries.forEach(e => {
+      const m = e.zirtecMorgens ? (e.zirtecMorgensMenge ?? 12) : 0;
+      const a = e.zirtecAbends ? (e.zirtecAbendsMenge ?? 12) : 0;
+      if (m + a > 0) { totalDrops += (m + a); daysWithZirtec++; }
+    });
+    const avgDrops = daysWithZirtec ? (totalDrops / daysWithZirtec).toFixed(1) : '0';
+
+    // OralAir-Compliance
+    const oralairJa = entries.filter(e => e.oralair === 'ja').length;
+    const oralairCompliance = Math.round((oralairJa / entries.length) * 100);
+
+    const css = ''
+      + 'body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1f2937;max-width:900px;margin:24px auto;padding:0 24px;line-height:1.5;font-size:13px}'
+      + 'h1{color:#0f766e;font-size:22px;margin-bottom:4px;border-bottom:2px solid #0f766e;padding-bottom:8px}'
+      + 'h2{color:#0f766e;font-size:16px;margin-top:24px;margin-bottom:10px;border-bottom:1px solid #d1d5db;padding-bottom:4px}'
+      + 'h3{font-size:14px;margin-top:14px;margin-bottom:6px;color:#374151}'
+      + '.meta{font-size:12px;color:#6b7280;margin-bottom:8px}'
+      + '.patient-box{background:#f9fafb;border:1px solid #e5e7eb;padding:12px 16px;border-radius:8px;margin:12px 0}'
+      + '.patient-box p{margin:2px 0}'
+      + 'table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11.5px}'
+      + 'th,td{border:1px solid #d1d5db;padding:6px 8px;text-align:left;vertical-align:top}'
+      + 'th{background:#f0fdfa;color:#0f766e;font-weight:600}'
+      + 'td.c{text-align:center}'
+      + 'ul{margin:6px 0 6px 20px}'
+      + 'li{margin-bottom:3px}'
+      + '.muted{color:#6b7280;font-style:italic}'
+      + '.note{background:#fef3c7;border-left:4px solid #f59e0b;padding:10px 14px;margin:10px 0;font-size:12px;border-radius:4px}'
+      + '.stats{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}'
+      + '.stat{flex:1;min-width:140px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px}'
+      + '.stat .num{font-size:20px;font-weight:700;color:#0f766e}'
+      + '.stat .lbl{font-size:11px;color:#6b7280;text-transform:uppercase}'
+      + '.print-btn{background:#0f766e;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin:12px 0}'
+      + '@media print{.print-btn{display:none}body{margin:0;padding:0;font-size:11px}h1{font-size:18px}h2{font-size:14px}table{font-size:10px}}';
+
+    return '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">'
+      + '<title>Arztbericht – Pollentagebuch ' + patientName + '</title>'
+      + '<style>' + css + '</style></head><body>'
+
+      + '<button class="print-btn" onclick="window.print()">🖨️ Drucken / Als PDF speichern</button>'
+
+      + '<h1>Arztbericht – Pollentagebuch</h1>'
+      + '<p class="meta">Erstellt am ' + today + ' · Zeitraum: ' + periodFrom + ' – ' + periodTo + ' · ' + entries.length + ' Einträge</p>'
+
+      + '<div class="patient-box">'
+      + '<p><strong>Patient:</strong> ' + patientName + '</p>'
+      + '<p><strong>Immunisierungstherapie:</strong> OralAir 300, täglich seit 30.12.2025 (3. Jahr)</p>'
+      + '<p><strong>Basismedikation:</strong> Zirtec 12 Tropfen (morgens und/oder abends)</p>'
+      + '<p><strong>Weitere:</strong> Visuglucan Augentropfen bei Bedarf</p>'
+      + '</div>'
+
+      + '<h2>Zusammenfassung</h2>'
+      + '<div class="stats">'
+      + '<div class="stat"><div class="num">' + entries.length + '</div><div class="lbl">Einträge</div></div>'
+      + '<div class="stat"><div class="num">' + oralairCompliance + '%</div><div class="lbl">OralAir-Compliance</div></div>'
+      + '<div class="stat"><div class="num">' + avgDrops + '</div><div class="lbl">Ø Zirtec Tr./Tag (an Einnahmetagen)</div></div>'
+      + '<div class="stat"><div class="num">' + daysWithZirtec + '</div><div class="lbl">Tage mit Zirtec</div></div>'
+      + '</div>'
+
+      + '<h2>Symptom-Häufigkeit</h2>'
+      + (symptomSummary ? '<ul>' + symptomSummary + '</ul>' : '<p class="muted">Keine Symptome im Zeitraum erfasst.</p>')
+
+      + '<h2>Medikamentenverlauf (Zirtec)</h2>'
+      + medChangesHtml
+
+      + '<h2>Pollenbelastung ↔ Symptome</h2>'
+      + buildPollenSectionHtml(entries)
+
+      + '<h2>Tagesübersicht</h2>'
+      + '<table><thead><tr>'
+      + '<th>Datum</th><th>OralAir</th><th>Zirtec (Tr.)</th><th>Weitere Med.</th><th>Symptome</th><th>Notiz</th>'
+      + '</tr></thead><tbody>' + tableRows + '</tbody></table>'
+
+      + '<p class="meta" style="margin-top:24px">Legende: M = Morgens, A = Abends · Zahlen = Tropfenanzahl · ✓ = eingenommen · – = nicht eingenommen</p>'
+
+      + '</body></html>';
+  }
+})();
+</script>
+</body>
+</html>
