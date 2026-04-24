@@ -1,0 +1,29 @@
+# System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Temp/Backup
+*.tmp
+*.bak
+*.log
+*~
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
+credentials.json
+secrets.yaml
+
+# Nutzer-Exporte (falls jemand lokal testet und exportiert)
+pollentagebuch-backup-*.json
+
+# Cowork
+.auto-memory/
